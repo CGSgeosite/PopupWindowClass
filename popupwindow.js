@@ -1,11 +1,3 @@
-//特别注意：leaflet0.7.7版的L.DomUtil.getPosition函数未考虑边界效应，这里暂直接采用1.0版的替代之。同时注意，必须先嵌入leaflet.js，然后再嵌入本脚本！
-L.DomUtil.getPosition = function (el) {
-    // 下行是0.7.7版
-    //return el._leaflet_pos; 
-    // 下行是1.0版
-    return el._leaflet_pos || new L.Point(0, 0);
-};
-
 /* PopupWindowClass 弹出式窗口类，需要leaflet提供的L.Class、L.Draggable类支持
 
 主要特点：
