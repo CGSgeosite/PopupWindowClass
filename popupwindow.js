@@ -130,9 +130,9 @@ L.Class.extend({
         if (options.zoomButton) {
             self.Show = $("popupWindowShow" + id);
             self.ShowControl = $("popupWindowShowControl" + id);
-        } else {
+        } else 
             self.Show = null;
-        }
+        
         var popupWindowShow = self.Show;
         var popupWindowTitle = self.Title = $("popupWindowTitle" + id);
         var popupWindowClose = self.Close = $("popupWindowClose" + id);
@@ -293,7 +293,6 @@ L.Class.extend({
                 function () {
                     var e = { originalEvent: this._lastEvent };
                     this.fire('predrag', e);
-                    //L.DomUtil.setPosition(this._element, this._newPos);
                     this.fire('drag', e);
                 };
             var DragEvent = self.DragEvent = {
@@ -473,10 +472,8 @@ L.Class.extend({
         (function () {
             if (opacity > 0) {
                 opacity = Math.max((opacity -= 0.1), 0);
-                if (style) {
-                    style.filter = 'alpha(opacity=' + (opacity * 100) + ')'; //ie
-                    style.opacity = opacity; //非ie
-                }
+                if (style) 
+                    style.filter = 'alpha(opacity=' + (style.opacity = opacity) * 100 + ')'; 
                 setTimeout(arguments.callee, 50);
             } else
                 (typeof callback === "function") && callback.call(context);
