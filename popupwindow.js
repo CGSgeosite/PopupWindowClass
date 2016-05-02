@@ -58,7 +58,12 @@ L.DomUtil.getPosition = function (el) {
     return el._leaflet_pos || new L.Point(0, 0);
 };
 
-var PopupWindowClass = L.Class.extend({
+var PopupWindowClass =
+
+//0.7.7
+L.Class.extend({
+//1.0.0
+//L.Evented.extend({
 
     //0.7.7采用L.Mixin.Events，1.0版不需要！
     includes: L.Mixin.Events, 
