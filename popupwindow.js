@@ -50,6 +50,8 @@
         openPopupWindow.once("close", function() {alert("窗口刚关闭!")}, this);
 */
 
+window.$ = L.DomUtil.get;
+
 //特别注意：leaflet0.7.7版的L.DomUtil.getPosition函数未考虑边界效应，这里暂直接采用1.0版的替代之。同时注意，必须先嵌入leaflet.js，然后再嵌入本脚本！
 L.DomUtil.getPosition = function (el) {
     // 下行是0.7.7版
