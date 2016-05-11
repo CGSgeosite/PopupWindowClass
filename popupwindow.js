@@ -62,7 +62,7 @@ L.DomUtil.getPosition = function (el) {
 var PopupWindowClass = L.Class.extend({
 
     //0.7.7采用下行，1.0.0不需要！
-    includes: L.Mixin.Events, //通过includes将事件对象加入原型prototype,以便在本类中侦听并触发非DOM事件
+    includes: L.Mixin.Events, 
 
     statics: {
         zIndex: 12345 //基于本类产生的若干对象中，首次创建的对象的最底层序编号
@@ -157,11 +157,8 @@ var PopupWindowClass = L.Class.extend({
             L.DomEvent.on(window, 'resize', self._onResize, self);
             self.Title_draggable = new L.Draggable
             (
-                //第一个参数是实际发生移动的dom对象，通常是母体
                 popupWindow,
-                //第二个参数是响应拖放事件的dom对象，通常是子体。若省略，便取母体对象
                 popupWindowTitle 
-                //第三个参数是逻辑值：母体是否绘制轮廓outline样式，默认false
             );
 
             self.LeftBottom_draggable = new L.Draggable
@@ -215,7 +212,6 @@ var PopupWindowClass = L.Class.extend({
                 function () {
                     var e = { originalEvent: this._lastEvent };
                     this.fire('predrag', e);
-                    //L.DomUtil.setPosition(this._element, this._newPos);
                     this.fire('drag', e);
                 };
 
@@ -252,7 +248,7 @@ var PopupWindowClass = L.Class.extend({
             self.RightTop_draggable.on(DragEvent, self);
             self.RightTop_draggable.enable();
 
-            L.DomEvent.on(popupWindowTitle, "dblclick", self.onDblclick, self);
+            L.DomEvent.on(popupWindowTitle, "click", self.onDblclick, self);
         }
 
         self.open = true;
@@ -352,44 +348,51 @@ var PopupWindowClass = L.Class.extend({
         if (self.full) {
             if (self.__onResize)
                 clearTimeout(self.__onResize);
-            self.__onResize =
-            setTimeout
+            self.__onResize = setTimeout
             (
                 L.bind
                 (
                     function () {
                         var self = this;
-                        clearTimeout(self.__onResize);
+                        self.__onResize = null;
                         self._size();
                     },
                     self
                 ),
-                10 
+                10
             );
         }
     }
     ,
-    onDblclick: function () {
+    onDblclick: function (e) {
+        L.DomEvent.stop(e);
         var self = this;
-        var options = self.options;
-        var popupWindow = self.Popup;
-        var style = popupWindow.style;
-        if (self.full) {
-            self.full = false;
-            options.top = self.top;
-            options.left = self.left;
-            options.width = self.width;
-            options.height = self.height;
-            style.transform = self.transform;
-        } else {
-            self.full = true;
-            self.top = options.top;
-            self.left = options.left;
-            self.width = options.width;
-            self.height = options.height;
-            self.transform = style.transform;
-        }
-        self._size();
+        if (self.__onDblclick) {
+            clearTimeout(self.__onDblclick);
+            self.__onDblclick = null;
+            var options = self.options;
+            var style = self.Popup.style;
+            if (self.full) {
+                self.full = false;
+                options.top = self.top;
+                options.left = self.left;
+                options.width = self.width;
+                options.height = self.height;
+                style.transform = self.transform;
+            } else {
+                self.full = true;
+                self.top = options.top;
+                self.left = options.left;
+                self.width = options.width;
+                self.height = options.height;
+                self.transform = style.transform;
+            }
+            self._size();
+        } else
+            self.__onDblclick = setTimeout(L.bind(function() {
+                var self = this;
+                self.__onDblclick = null;
+            }, self), 250);
     },
     _show: function () {
         var self = this;
@@ -474,10 +477,8 @@ var PopupWindowClass = L.Class.extend({
             }
 
             function TopLeft(top2left) {
-                if (top2left !== 1)
-                    popupWindowstyle.top = (options.top = (parseInt(popupWindowstyle.top) + xy.y)) + "px";
-                if (top2left !== 0)
-                    popupWindowstyle.left = (options.left = (parseInt(popupWindowstyle.left) + xy.x)) + "px";
+                (top2left !== 1) && (popupWindowstyle.top = (options.top = (parseInt(popupWindowstyle.top) + xy.y)) + "px");
+                (top2left !== 0) && (popupWindowstyle.left = (options.left = (parseInt(popupWindowstyle.left) + xy.x)) + "px");
             }
 
             if (!titleDrag) {
@@ -645,14 +646,8 @@ var PopupWindowClass = L.Class.extend({
     }
     ,
     _fadeOut: function (DIV, callback, context) {
-        var style, opacity;
-        if (DIV) {
-            style = DIV.style;
-            opacity = parseFloat(style.opacity);
-        } else {
-            style = null;
-            opacity = 0;
-        }
+        var style = DIV ? DIV.style : null;
+        var opacity = DIV ? parseFloat(style.opacity) : 0;
         (function () {
             if (opacity > 0) {
                 opacity = Math.max((opacity -= 0.1), 0);
@@ -665,7 +660,7 @@ var PopupWindowClass = L.Class.extend({
     }
     ,
     close: function () {
-        //窗口关闭函数
+        //关闭窗口
         var self = this;
         var options = self.options;
         if (self.open) {
@@ -701,7 +696,7 @@ var PopupWindowClass = L.Class.extend({
                 self.LeftBottom_draggable.off(DragEvent, self);
                 self.LeftBottom_draggable.disable();
 
-                L.DomEvent.off(self.Title, "dblclick", self.onDblclick, self);
+                L.DomEvent.off(self.Title, "click", self.onDblclick, self);
             }
             L.DomEvent.off(self.Close, "click", self.close, self);
             options.model && L.DomEvent.off(self.Mask, "click", self.close, self);
